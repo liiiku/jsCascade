@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <select name="province" id="pro">
+        <option>请选择</option>
+    </select>
+    <select name="city" id="city">
+        <option>请选择</option>
+    </select>
+</body>
+<script>
+    var pro = document.getElementById('pro');
+    var city = document.getElementById('city');
+
+    //创建请求对象
+    var xhr = null;
+    if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+    } else if (window.ActiveXObject) {
+        var versions = ["Msxml2.XMLHTTP", "Microsoft.XMLHTTP"];
+        for (var tempVersion of versions) {
+            xhr = new ActiveXObject(tempVersion);
+            if (xhr != undefined) {
+                break;
+            }
+        }
+    } else {
+        throw new Error("该浏览器不支持ajax！");
+    }
+
+    //建立连接
+    xhr.open('GET', 'city.json');
+
+    //发起请求
+    xhr.send(null);
+
+    //接收响应
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            var obj = JSON.parse(xhr.responseText);
+
+            //添加省份
+            for(var i of obj["城市代码"]) {
+                var Poptions = document.createElement('option');
+                Poptions.innerHTML = i["省"];
+                pro.appendChild(Poptions);
+            }
+
+            pro.onchange = function() {
+
+                //清除city中的所有值
+                for(var i=city.options.length-1 ; i>=1 ; i--) {
+                    city.removeChild(city.options[1]);
+                }
+
+                //添加城市
+                for(var j of obj["城市代码"]) {
+                    if(j["省"] == this.value) {
+                        for(var k of j["市"]) {
+                            var Coptions = document.createElement('option');
+                            Coptions.innerHTML = k["市名"];
+                            city.appendChild(Coptions);
+                        }
+                    }
+                }
+            }
+        }
+    };
+</script>
+</html>
